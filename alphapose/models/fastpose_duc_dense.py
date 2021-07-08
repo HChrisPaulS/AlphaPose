@@ -17,6 +17,7 @@ class FastPose_DUC_Dense(nn.Module):
     def __init__(self,norm_layer=nn.BatchNorm2d,**cfg):
         super(FastPose_DUC_Dense, self).__init__()
         self._preset_cfg = cfg['PRESET']
+     #Resnet是深度残差网络，允许网络进一步加深，根据配置选取残差网络中的哪一种
         if cfg['BACKBONE'] == 'shuffle':
             print('Load shuffle backbone...')
             backbone = ShuffleResnet
@@ -35,7 +36,7 @@ class FastPose_DUC_Dense(nn.Module):
         else:
             self.preact = backbone(f"resnet{cfg['NUM_LAYERS']}")
 
-        # Init Backbone
+        # Init Backbone--建立骨干部分
         for m in self.preact.modules():
             if isinstance(m, nn.Conv2d):
                 nn.init.normal_(m.weight, std=0.001)
@@ -83,7 +84,8 @@ class FastPose_DUC_Dense(nn.Module):
         duc3_dense = self._make_duc_stage(stage3_cfg,512,self.conv_dim)
 
         self.duc_dense = nn.Sequential(duc1_dense,duc2_dense,duc3_dense)
-
+       
+        #进行卷积操作
         self.conv_out = nn.Conv2d(
             self.conv_dim, self._preset_cfg['NUM_JOINTS'], kernel_size=3, stride=1, padding=1)
 

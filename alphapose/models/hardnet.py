@@ -2,6 +2,7 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
+#python环境下对文件，文件夹执行操作的一个模块
 import os
 import collections
 import numpy as np
@@ -20,6 +21,7 @@ from .layers.ShuffleResnet import ShuffleResnet
 BN_MOMENTUM = 0.1
 DEBUG = False
 
+#对3*3的区域进行卷积操作的函数
 def conv3x3(in_planes, out_planes, stride=1):
     "3x3 convolution with padding"
     return nn.Conv2d(in_planes, out_planes, kernel_size=3, stride=stride,
@@ -33,11 +35,12 @@ class Identity(nn.Module):
     def forward(self, x):
         return x
 
-
+#定义平滑的操作
 class Flatten(nn.Module):
     def __init__(self):
         super().__init__()
     def forward(self, x):
+        #进行张量维度的重构
         return x.view(x.data.size(0),-1)
 
 
