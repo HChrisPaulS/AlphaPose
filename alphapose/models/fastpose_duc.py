@@ -15,6 +15,7 @@ from .layers.ShuffleResnet import ShuffleResnet
 class FastPose_DUC(nn.Module):
     conv_dim = 256
 
+    #初始化一样是在配置文件中读取配置信息
     def __init__(self, norm_layer=nn.BatchNorm2d, **cfg):
         super(FastPose_DUC, self).__init__()
         self._preset_cfg = cfg['PRESET']
@@ -39,6 +40,7 @@ class FastPose_DUC(nn.Module):
         # Imagenet pretrain model
         import torchvision.models as tm   # noqa: F401,F403
         assert cfg['NUM_LAYERS'] in [18, 34, 50, 101, 152]
+        #执行字符串表达式 并返回表达式的值
         x = eval(f"tm.resnet{cfg['NUM_LAYERS']}(pretrained=True)")
 
         model_state = self.preact.state_dict()
@@ -71,10 +73,11 @@ class FastPose_DUC(nn.Module):
     def _make_duc_stage(self, layer_config, inplanes, outplanes):
         layers = []
 
+        #将低分辨率图片转换为高分辨率图片，并非通过插值，而是用卷积和周期筛选实现
         shuffle = nn.PixelShuffle(2)
         inplanes //= 4
         layers.append(shuffle)
-        for i in range(layer_config.NUM_CONV - 1):
+        for i in range(layer_config.NUM_CONV - 1):#创建整数列表并遍历
             conv = nn.Conv2d(inplanes, inplanes, kernel_size=3,
                              padding=1, bias=False)
             norm_layer = self.norm_layer(inplanes, momentum=0.1)

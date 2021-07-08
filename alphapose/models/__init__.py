@@ -1,3 +1,4 @@
+#模型初始化模块，将所有使用的模型导入并初始化
 from .fastpose import FastPose
 from .fastpose_duc import FastPose_DUC
 from .hrnet import PoseHighResolutionNet

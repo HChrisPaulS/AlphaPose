@@ -13,10 +13,13 @@ from .layers.SE_Resnet import SEResnet
 @SPPE.register_module
 class FastPose(nn.Module):
 
+    #cfg是配置文件，为了代码可读性，一层层的神经网络用cfg格式文件保存，用的时候可以直接调用
     def __init__(self, norm_layer=nn.BatchNorm2d, **cfg):
         super(FastPose, self).__init__()
         self._preset_cfg = cfg['PRESET']
+        #cfg是根据键值对来编写的，这里循环遍历cfg中的key找到CONV_DIM
         if 'CONV_DIM' in cfg.keys():
+            #从配置文件中读出CONV_DIM的value
             self.conv_dim = cfg['CONV_DIM']
         else:
             self.conv_dim = 128
@@ -26,6 +29,7 @@ class FastPose(nn.Module):
             self.preact = SEResnet(
                 f"resnet{cfg['NUM_LAYERS']}", dcn=dcn, stage_with_dcn=stage_with_dcn)
         else:
+            #Resnet函数解决了梯度中连乘导致梯度消失的问题
             self.preact = SEResnet(f"resnet{cfg['NUM_LAYERS']}")
 
         # Imagenet pretrain model
@@ -47,7 +51,7 @@ class FastPose(nn.Module):
             self.duc2 = DUC(256, 512, upscale_factor=2, norm_layer=norm_layer)
         self.conv_out = nn.Conv2d(
             self.conv_dim, self._preset_cfg['NUM_JOINTS'], kernel_size=3, stride=1, padding=1)
-
+    #前向函数    
     def forward(self, x):
         out = self.preact(x)
         out = self.suffle1(out)
@@ -59,6 +63,7 @@ class FastPose(nn.Module):
 
     def _initialize(self):
         for m in self.conv_out.modules():
+            #用来判断一个量是否是相应的类型
             if isinstance(m, nn.Conv2d):
                 # nn.init.kaiming_normal_(m.weight, mode='fan_out', nonlinearity='relu')
                 # logger.info('=> init {}.weight as normal(0, 0.001)'.format(name))
